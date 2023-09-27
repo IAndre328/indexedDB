@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+
+  <meta name="HandheldFriendly" content="true">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+
+  <!-- Título do site -->
+  <title>Tarefas a fazer</title>
+  <meta property="og:title" content="Nome do Site">
+
+  <!-- Descrição do site -->
+  <meta name="description" content="Escreva a descrição do site aqui.">
+  <meta itemprop="description" content="Escreva a descrição do site aqui.">
+  <meta property="og:description" content="Escreva a descrição do site aqui.">
+
+  <!-- Cor tema do site -->
+  <meta name="theme-color" content="#FFFFFF">
+  <meta name="msapplication-TileColor" content="#FFFFFF">
+  <meta name="msapplication-navbutton-color" content="#FFFFFF">
+  <meta name="apple-mobile-web-app-status-bar-style" content="#FFFFFF">
+
+
+  <!-- Tamanho imagem compartilhamento -->
+  <meta property="og:locale" content="pt_BR">
+  <meta property="og:image:type" content="image/png">
+  <meta property="og:image:width" content="1920">
+  <meta property="og:image:height" content="1080">
+  <meta property="og:type" content="website">
+  <meta property="og:card" content="summary_large_image">
+
+  <!-- Imagem de compartilhamento -->
+  <meta name="image" content="./files/favicons/favicon-194x194.png">
+  <meta itemprop="image" content="./files/favicons/favicon-194x194.png">
+  <meta property="og:image" content="./files/favicons/favicon-194x194.png">
+
+  <!-- Nome do Site -->
+  <meta name="author" content="Nome do Site">
+  <meta itemprop="name" content="Nome do Site">
+  <meta name="article:author" content="Nome do Site">
+  <meta name="application-name" content="Nome do Site">
+  <meta property="og:site_name" content="Nome do Site">
+  <meta name="apple-mobile-web-app-title" content="Nome do Site">
+
+
+    <link rel="stylesheet" href="style.css">
+    <script src="js.js" defer></script>
+</head>
+<body>
+    <header>
+        <h1>
+            Tarefas para fazer
+        </h1>
+    </header>
+    <section>
+        <div id="textos">
+            <label for="txt">Tarefa a ser feita:</label>
+           <input type="text" id="txt" placeholder="Digite aqui">
+           <button id="adicionar">Adicionar</button><br><br>
+        </div>
+        <output id="res">
+           
+        </output>
+        <button id="limpar">Limpar todos</button>
+    </section>  
+    
+    <footer>
+        <p>&copy; Qualysolda</p>
+    </footer>
+   <script src="./banco_de_dados.js"></script>
+</body>
+</html>
