@@ -9,8 +9,9 @@ request.onupgradeneeded = function(event) {
     var tarefasStore = db.createObjectStore("tarefas", { keyPath: "id", autoIncrement: true });
 
     // Define os campos que você deseja armazenar na tabela
-    tarefasStore.createIndex("tarefa", "tarefa", { unique: false });
+    tarefasStore.createIndex("tarefa", "tarefa", { unique: true });
     tarefasStore.createIndex("sublinhado", "sublinhado", { unique: false });
+    tarefasStore.createIndex("alarme","alarme",{unique:false})
 
     console.log("Banco de dados 'TarefasData' criado com sucesso.");
 };

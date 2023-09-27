@@ -1,4 +1,4 @@
-function adicionarTarefa(tarefa, sublinhado) {
+function adicionarTarefa(tarefa, sublinhado = false) {
     var request = indexedDB.open("TarefasData", 1);
 
     request.onsuccess = function(event) {
