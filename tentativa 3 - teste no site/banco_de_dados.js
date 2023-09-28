@@ -4,10 +4,10 @@ let request = indexedDB.open("TarefasData", 1);
 
 // Manipulador de evento de atualização chamado quando o banco de dados precisa ser criado ou atualizado
 request.onupgradeneeded = function(event) {
-    var db = event.target.result;
+    let db = event.target.result;
 
     // Cria uma tabela chamada "tarefas" com um índice automático
-    var tarefasStore = db.createObjectStore("tarefas", { keyPath: "id", autoIncrement: true });
+    let tarefasStore = db.createObjectStore("tarefas", { keyPath: "id", autoIncrement: true });
 
     // Define os campos que você deseja armazenar na tabela
     tarefasStore.createIndex("tarefa", "tarefa", { unique: true });
@@ -22,8 +22,7 @@ request.onupgradeneeded = function(event) {
 
 // Manipulador de evento de sucesso chamado quando a conexão com o banco de dados é estabelecida
 request.onsuccess = function(event) {
-    var db = event.target.result;
-    console.log("Conexão com o banco de dados 'TarefasData' estabelecida com sucesso.");
+    let db = event.target.result;
 
     // Agora você pode começar a usar o banco de dados para inserir, recuperar, atualizar ou excluir dados.
 };
@@ -38,20 +37,20 @@ request.onerror = function(event) {
 
 
 function DB_adicionarTarefa(tarefa, sublinhado = false) {
-    var request = indexedDB.open("TarefasData", 1);
+    let request = indexedDB.open("TarefasData", 1);
 
     request.onsuccess = function(event) {
-        var db = event.target.result;
+        let db = event.target.result;
         
-        var transaction = db.transaction(["tarefas"], "readwrite");
-        var store = transaction.objectStore("tarefas");
+        let transaction = db.transaction(["tarefas"], "readwrite");
+        let store = transaction.objectStore("tarefas");
 
-        var novaTarefa = {
+        let novaTarefa = {
             tarefa: tarefa,
             sublinhado: sublinhado
         };
 
-        var addRequest = store.add(novaTarefa);
+        let addRequest = store.add(novaTarefa);
 
         addRequest.onsuccess = function(event) {
             console.log("Tarefa adicionada com sucesso.");
@@ -67,22 +66,22 @@ function DB_adicionarTarefa(tarefa, sublinhado = false) {
 
 // função para atualizar algum dado 
 function DB_atualizarTarefa(id, novaTarefa, novoSublinhado) {
-    var request = indexedDB.open("TarefasData", 1);
+    let request = indexedDB.open("TarefasData", 1);
 
     request.onsuccess = function(event) {
-        var db = event.target.result;
+        let db = event.target.result;
         
-        var transaction = db.transaction(["tarefas"], "readwrite");
-        var store = transaction.objectStore("tarefas");
+        let transaction = db.transaction(["tarefas"], "readwrite");
+        let store = transaction.objectStore("tarefas");
 
-        var getRequest = store.get(id);
+        let getRequest = store.get(id);
 
         getRequest.onsuccess = function(event) {
-            var tarefa = event.target.result;
+            let tarefa = event.target.result;
             if (tarefa) {
                 tarefa.tarefa = novaTarefa;
                 tarefa.sublinhado = novoSublinhado;
-                var updateRequest = store.put(tarefa);
+                let updateRequest = store.put(tarefa);
 
                 updateRequest.onsuccess = function(event) {
                     console.log("Tarefa atualizada com sucesso.");
@@ -104,15 +103,15 @@ function DB_atualizarTarefa(id, novaTarefa, novoSublinhado) {
 
 
 function DB_removerTarefa(id) {
-    var request = indexedDB.open("TarefasData", 1);
+    let request = indexedDB.open("TarefasData", 1);
 
     request.onsuccess = function(event) {
-        var db = event.target.result;
+        let db = event.target.result;
         
-        var transaction = db.transaction(["tarefas"], "readwrite");
-        var store = transaction.objectStore("tarefas");
+        let transaction = db.transaction(["tarefas"], "readwrite");
+        let store = transaction.objectStore("tarefas");
 
-        var deleteRequest = store.delete(id);
+        let deleteRequest = store.delete(id);
 
         deleteRequest.onsuccess = function(event) {
             console.log("Tarefa removida com sucesso.");
@@ -127,23 +126,23 @@ function DB_removerTarefa(id) {
 
 
 function DB_visualizarTodasTarefas() {
-    var request = indexedDB.open("TarefasData", 1);
+    let request = indexedDB.open("TarefasData", 1);
 
     request.onsuccess = function(event) {
-        var db = event.target.result;
+        let db = event.target.result;
 
         // Inicie uma transação de leitura na tabela "tarefas"
-        var transaction = db.transaction(["tarefas"], "readonly");
-        var store = transaction.objectStore("tarefas");
+        let transaction = db.transaction(["tarefas"], "readonly");
+        let store = transaction.objectStore("tarefas");
 
         // Abra um cursor para iterar pelos registros
-        var cursorRequest = store.openCursor();
+        let cursorRequest = store.openCursor();
 
         cursorRequest.onsuccess = function(event) {
-            var cursor = event.target.result;
+            let cursor = event.target.result;
             if (cursor) {
                 console.log(cursor)
-                var tarefa = cursor.value;
+                let tarefa = cursor.value;
                 console.log("ID: " + cursor.key);
                 console.log("Tarefa: " + tarefa.tarefa);
                 console.log("Sublinhado: " + tarefa.sublinhado);
@@ -164,5 +163,56 @@ function DB_visualizarTodasTarefas() {
     };
 }
 
-// Chame a função para visualizar as tarefas
-DB_visualizarTodasTarefas();
+
+let tarefa;
+function DB_buscarTarefaPorNome(nomeTarefa) {
+    let request = indexedDB.open("TarefasData", 1);
+    
+    request.onsuccess = function(event) {
+        let db = event.target.result;
+
+        // Inicie uma transação de leitura na tabela "tarefas"
+        let transaction = db.transaction(["tarefas"], "readonly");
+        let store = transaction.objectStore("tarefas");
+
+        // Use o índice "indice_tarefa" para buscar pelo nome da tarefa
+        let index = store.index("tarefa");
+        let getRequest = index.get(nomeTarefa);
+
+        
+        
+
+        getRequest.onsuccess = function(event) {
+            tarefa = event.target.result;
+            if (tarefa) {
+                console.log("ID: " + tarefa.id);
+                console.log("Tarefa: " + tarefa.tarefa);
+                console.log("Sublinhado: " + tarefa.sublinhado);
+                console.log(tarefa)
+               let dadosSucesso = DB_extrairDadosBusca(tarefa)
+            } else {
+                console.log("Tarefa com nome '" + nomeTarefa + "' não encontrada.");
+            }
+            
+        };
+        
+        getRequest.onerror = function(event) {
+            console.error("Erro ao buscar a tarefa por nome: " + event.target.error);
+        };
+        
+    };
+    request.onerror = function(event) {
+        console.error("Erro ao abrir o banco de dados 'TarefasData': " + event.target.error);
+    };
+
+}
+
+function DB_extrairDadosBusca(tarefa){
+    let resultado = {
+        id:tarefa.id,
+        tarefa:tarefa.tarefa,
+        sublinhado:tarefa.sublinhado,
+    }
+    console.log(resultado)
+}
+

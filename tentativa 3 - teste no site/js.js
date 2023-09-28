@@ -78,14 +78,21 @@ function exibirAlerta(mensagem) {
 
   // Função para adicionar uma nova tarefa à lista de tarefas e ao arrayTarefas
   function adicionarTarefa(texto) {
-    
+    let dadosTarefa;
     DB_adicionarTarefa(texto);
+  
+   console.log(dadosTarefa)
+    
+   
 
     const tarefaDiv = criarElemento("div", ["CoisasTarefa"]);
+
+    const tarefaData = criarElemento("data",["tarefa"]);
   
     const tarefaParagrafo = criarElemento("p", ["tarefa"]);
   
     tarefaParagrafo.textContent = texto;
+    
   
     const alarmeBtn = criarElemento("button", ["alarme"],configAlarme);
   
@@ -93,7 +100,8 @@ function exibirAlerta(mensagem) {
   
     const excluirBtn = criarElemento("button", ["excluir"],deletar);
   
-    adicionarElementos(tarefaDiv, [tarefaParagrafo, alarmeBtn, sublinharBtn, excluirBtn]);
+    adicionarElementos(tarefaData,[tarefaParagrafo]);
+    adicionarElementos(tarefaDiv, [tarefaData, alarmeBtn, sublinharBtn, excluirBtn]);
   
   
     res.appendChild(tarefaDiv);
