@@ -14,7 +14,7 @@ let alarmes = [];
 const extrairValorInput = (input) => input.value;
 
 // Função para extrair o elemento p pai de um item
-const extrairPaiDoItem = (item) => item.parentElement.querySelector("p");
+const extrairPDoItem = (item) => item.parentElement.querySelector("p");
 
 
 
@@ -25,7 +25,7 @@ function verificarTarefa() {
 
   if (valorInput.length > 0 && !arrayTarefas.includes(valorInput)) {
     arrayTarefas.push(valorInput)
-    adicionarTarefa(valorInput);
+    DB_adicionarTarefa(valorInput,false);
 
   } else if (arrayTarefas.includes(valorInput)) {
 
@@ -77,21 +77,18 @@ function exibirAlerta(mensagem) {
 
 
   // Função para adicionar uma nova tarefa à lista de tarefas e ao arrayTarefas
-  function adicionarTarefa(texto) {
-    let dadosTarefa;
-    DB_adicionarTarefa(texto);
-  
-   console.log(dadosTarefa)
+  function adicionarTarefa(id,texto,sublinhado) {
     
-   
-
     const tarefaDiv = criarElemento("div", ["CoisasTarefa"]);
 
     const tarefaData = criarElemento("data",["tarefa"]);
   
     const tarefaParagrafo = criarElemento("p", ["tarefa"]);
-  
+    
+    tarefaData.value = id;
     tarefaParagrafo.textContent = texto;
+
+    if(sublinhado)tarefaParagrafo.classList.add("sublinhado");
     
   
     const alarmeBtn = criarElemento("button", ["alarme"],configAlarme);
@@ -127,9 +124,17 @@ function adicionarElementos(elementoPai, elementosFilhos) {
 function sublinhar(e) {
  
     const item = e.target;
-    const itemP = extrairPaiDoItem(item);
+    const itemP = extrairPDoItem(item);
   
       itemP.classList.toggle("sublinhado");
+
+    
+
+      DB_atualizarTarefa(
+        Number(item.parentElement.querySelector("data").value),
+        itemP.textContent,
+        itemP.classList.contains("sublinhado")
+        )
     
   }
 
@@ -138,7 +143,11 @@ function sublinhar(e) {
 // Função para deletar uma tarefa
 function deletar(e) {
     const item = e.target;
-      item.parentElement.remove();
+    const itemP = item.parentElement;
+    console.log(itemP)
+    let id = Number(itemP.querySelector("data").value);
+    DB_removerTarefa(id);
+    itemP.remove();
 
     // banco de dados aqui
 
@@ -150,7 +159,7 @@ function configAlarme(e) {
   
     const item = e.target;
   
-    const textoItem = extrairPaiDoItem(item).textContent;
+    const textoItem = extrairPDoItem(item).textContent;
   
     if (item.classList[0] == "alarme") {
   
@@ -173,10 +182,8 @@ function configAlarme(e) {
   // Função para limpar o conteúdo e redefinir o armazenamento local
 function limpar() {
     res.innerHTML = "";
-    localStorage.clear();
-    window.location.reload();
-
-    // banco de dados aqui
+    DB_apagarBancoDeDados();
+    
 
   }
 
@@ -230,16 +237,10 @@ function limpar() {
 
 
 
-
-
-
-
-
-
 // addEventListeners
 
   // Função para verificar se a tecla Enter foi pressionada e chamar a função verificarTarefa()
-function aoPressionarEnter(evento) {
+const aoPressionarEnter = evento => {
     if (evento.key === "Enter") {
       verificarTarefa();
     }
@@ -253,3 +254,6 @@ function aoPressionarEnter(evento) {
   // Adicionar eventos de clique aos botões de limpar e adicionar
   btn_limpar.addEventListener("click", limpar);
   btn_adicionar.addEventListener("click", verificarTarefa);
+
+// Adicionar listener para carregar as tarefas salvas
+document.addEventListener("DOMContentLoaded",DB_visualizarTodasTarefas)
