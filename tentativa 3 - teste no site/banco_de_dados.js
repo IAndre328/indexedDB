@@ -54,6 +54,7 @@ function DB_adicionarTarefa(tarefa, sublinhado = false) {
 
         addRequest.onsuccess = function(event) {
             console.log("Tarefa adicionada com sucesso.");
+            DB_buscarTarefaPorNome(tarefa)
         };
 
         addRequest.onerror = function(event) {
@@ -81,6 +82,7 @@ function DB_atualizarTarefa(id, novaTarefa, novoSublinhado) {
             if (tarefa) {
                 tarefa.tarefa = novaTarefa;
                 tarefa.sublinhado = novoSublinhado;
+                console.log(tarefa.sublinhado)
                 let updateRequest = store.put(tarefa);
 
                 updateRequest.onsuccess = function(event) {
@@ -141,12 +143,23 @@ function DB_visualizarTodasTarefas() {
         cursorRequest.onsuccess = function(event) {
             let cursor = event.target.result;
             if (cursor) {
-                console.log(cursor)
                 let tarefa = cursor.value;
-                console.log("ID: " + cursor.key);
-                console.log("Tarefa: " + tarefa.tarefa);
-                console.log("Sublinhado: " + tarefa.sublinhado);
-                console.log("-----------");
+
+
+                // console.log(cursor)
+                // console.log("ID: " + cursor.key);
+                // console.log("Tarefa: " + tarefa.tarefa);
+                // console.log("Sublinhado: " + tarefa.sublinhado);
+                // console.log("-----------");
+
+                let objetoTarefa = {
+                    id: cursor.key,
+                    tarefa:tarefa.tarefa,
+                    sublinhado:tarefa.sublinhado
+                }
+
+                adicionarTarefa(objetoTarefa.id, objetoTarefa.tarefa, objetoTarefa.sublinhado)
+
                 cursor.continue(); // Continue para o próximo registro
             } else {
                 console.log("Fim da lista de tarefas.");
@@ -164,9 +177,10 @@ function DB_visualizarTodasTarefas() {
 }
 
 
-let tarefa;
+
 function DB_buscarTarefaPorNome(nomeTarefa) {
     let request = indexedDB.open("TarefasData", 1);
+    
     
     request.onsuccess = function(event) {
         let db = event.target.result;
@@ -183,14 +197,24 @@ function DB_buscarTarefaPorNome(nomeTarefa) {
         
 
         getRequest.onsuccess = function(event) {
-            tarefa = event.target.result;
+          let tarefa = event.target.result;
             if (tarefa) {
-                console.log("ID: " + tarefa.id);
-                console.log("Tarefa: " + tarefa.tarefa);
-                console.log("Sublinhado: " + tarefa.sublinhado);
-                console.log(tarefa)
-               let dadosSucesso = DB_extrairDadosBusca(tarefa)
-            } else {
+
+                // console.log("ID: " + tarefa.id);
+                // console.log("Tarefa: " + tarefa.tarefa);
+                // console.log("Sublinhado: " + tarefa.sublinhado);
+                // console.log(tarefa)
+
+                let resultado = {
+                    id:tarefa.id,
+                    tarefa:tarefa.tarefa,
+                    sublinhado:tarefa.sublinhado,
+                    }
+
+                    adicionarTarefa(resultado.id,resultado.tarefa,resultado.sublinhado)
+
+                } 
+                else {
                 console.log("Tarefa com nome '" + nomeTarefa + "' não encontrada.");
             }
             
@@ -204,15 +228,26 @@ function DB_buscarTarefaPorNome(nomeTarefa) {
     request.onerror = function(event) {
         console.error("Erro ao abrir o banco de dados 'TarefasData': " + event.target.error);
     };
-
+     
 }
 
-function DB_extrairDadosBusca(tarefa){
-    let resultado = {
-        id:tarefa.id,
-        tarefa:tarefa.tarefa,
-        sublinhado:tarefa.sublinhado,
-    }
-    console.log(resultado)
+function DB_apagarBancoDeDados(){
+    const nomeDoBancoDeDados = "TarefasData";
+
+    const request = indexedDB.deleteDatabase(nomeDoBancoDeDados);
+
+request.onsuccess = function(event) {
+    console.log("Banco de dados '" + nomeDoBancoDeDados + "' excluído com sucesso.");
+};
+
+request.onerror = function(event) {
+    console.error("Erro ao excluir o banco de dados '" + nomeDoBancoDeDados + "': " + event.target.error);
+};
+
+request.onblocked = function(event) {
+    console.warn("O banco de dados '" + nomeDoBancoDeDados + "' está bloqueado por outra transação.");
+};
+
+
 }
 
