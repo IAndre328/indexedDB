@@ -8,6 +8,8 @@ const res = document.querySelector("#res");
 // Array para armazenar os alarmes
 let alarmes = [];
 
+// Array para armazenar as tarefas
+let arrayTarefas = [];
 
 // Função para extrair o valor de um elemento de entrada (input)
 const extrairValorInput = (input) => input.value;
@@ -24,6 +26,7 @@ function verificarTarefa() {
 
   if (valorInput.length > 0 && !arrayTarefas.includes(valorInput)) {
     DB_adicionarTarefa(valorInput,false);
+    arrayTarefas.push(valorInput);
 
   } else if (arrayTarefas.includes(valorInput)) {
 
@@ -132,8 +135,6 @@ function sublinhar(e) {
   
       itemP.classList.toggle("sublinhado");
 
-    
-
       DB_atualizarTarefa(
         Number(item.parentElement.querySelector("data").value),
         itemP.textContent,
@@ -185,6 +186,7 @@ function configAlarme(e) {
 function limpar() {
     res.innerHTML = "";
     DB_apagarBancoDeDados();
+    window.location.reload();
     
 
   }

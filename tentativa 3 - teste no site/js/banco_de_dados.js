@@ -36,33 +36,40 @@ request.onerror = function(event) {
 
 
 
-function DB_adicionarTarefa(tarefa, sublinhado = false,alarme = "") {
+function DB_adicionarTarefa(tarefa, sublinhado = false, alarme = "") {
     let request = indexedDB.open("TarefasData", 1);
 
-    request.onsuccess = function(event) {
+    request.onsuccess = function (event) {
         let db = event.target.result;
-        
-        let transaction = db.transaction(["tarefas"], "readwrite");
+
+        let transaction;
+        if (window.webkitIDBTransaction && window.webkitIDBTransaction.READ_WRITE) {
+            transaction = db.transaction(["tarefas"], window.webkitIDBTransaction.READ_WRITE);
+        } else {
+            transaction = db.transaction(["tarefas"], "readwrite");
+        }
+
         let store = transaction.objectStore("tarefas");
 
         let novaTarefa = {
             tarefa: tarefa,
             sublinhado: sublinhado,
-            alarme:alarme
+            alarme: alarme
         };
 
         let addRequest = store.add(novaTarefa);
 
-        addRequest.onsuccess = function(event) {
+        addRequest.onsuccess = function (event) {
             console.log("Tarefa adicionada com sucesso.");
-            DB_buscarTarefaPorNome(tarefa)
+            DB_buscarTarefaPorNome(tarefa);
         };
 
-        addRequest.onerror = function(event) {
+        addRequest.onerror = function (event) {
             console.error("Erro ao adicionar a tarefa: " + event.target.error);
         };
     };
 }
+
 
 
 
@@ -79,9 +86,14 @@ function DB_atualizarTarefa(id, novaTarefa, novoSublinhado, novoAlarme) {
     request.onsuccess = function(event) {
         let db = event.target.result;
         
-        let transaction = db.transaction(["tarefas"], "readwrite");
+        let transaction;
+        if (window.webkitIDBTransaction && window.webkitIDBTransaction.READ_WRITE) {
+            transaction = db.transaction(["tarefas"], window.webkitIDBTransaction.READ_WRITE);
+        } else {
+            transaction = db.transaction(["tarefas"], "readwrite");
+        }
+        
         let store = transaction.objectStore("tarefas");
-
         let getRequest = store.get(id);
 
         getRequest.onsuccess = function(event) {
@@ -123,9 +135,14 @@ function DB_removerTarefa(id) {
     request.onsuccess = function(event) {
         let db = event.target.result;
         
-        let transaction = db.transaction(["tarefas"], "readwrite");
+        let transaction;
+        if (window.webkitIDBTransaction && window.webkitIDBTransaction.READ_WRITE) {
+            transaction = db.transaction(["tarefas"], window.webkitIDBTransaction.READ_WRITE);
+        } else {
+            transaction = db.transaction(["tarefas"], "readwrite");
+        }
+        
         let store = transaction.objectStore("tarefas");
-
         let deleteRequest = store.delete(id);
 
         deleteRequest.onsuccess = function(event) {
@@ -147,7 +164,13 @@ function DB_visualizarTodasTarefas() {
         let db = event.target.result;
 
         // Inicie uma transação de leitura na tabela "tarefas"
-        let transaction = db.transaction(["tarefas"], "readonly");
+        let transaction;
+        if (window.webkitIDBTransaction && window.webkitIDBTransaction.READ_ONLY) {
+            transaction = db.transaction(["tarefas"], window.webkitIDBTransaction.READ_ONLY);
+        } else {
+            transaction = db.transaction(["tarefas"], "readonly");
+        }
+        
         let store = transaction.objectStore("tarefas");
 
         // Abra um cursor para iterar pelos registros
@@ -158,20 +181,14 @@ function DB_visualizarTodasTarefas() {
             if (cursor) {
                 let tarefa = cursor.value;
 
-
-                // console.log(cursor)
-                // console.log("ID: " + cursor.key);
-                // console.log("Tarefa: " + tarefa.tarefa);
-                // console.log("Sublinhado: " + tarefa.sublinhado);
-                // console.log("-----------");
-
                 let objetoTarefa = {
                     id: cursor.key,
                     tarefa:tarefa.tarefa,
                     sublinhado:tarefa.sublinhado
                 }
 
-                adicionarTarefa(objetoTarefa.id, objetoTarefa.tarefa, objetoTarefa.sublinhado)
+                adicionarTarefa(objetoTarefa.id, objetoTarefa.tarefa, objetoTarefa.sublinhado);
+                arrayTarefas.push(objetoTarefa.tarefa);
 
                 cursor.continue(); // Continue para o próximo registro
             } else {
@@ -199,7 +216,12 @@ function DB_buscarTarefaPorNome(nomeTarefa) {
         let db = event.target.result;
 
         // Inicie uma transação de leitura na tabela "tarefas"
-        let transaction = db.transaction(["tarefas"], "readonly");
+        let transaction;
+        if (window.webkitIDBTransaction && window.webkitIDBTransaction.READ_ONLY) {
+            transaction = db.transaction(["tarefas"], window.webkitIDBTransaction.READ_ONLY);
+        } else {
+            transaction = db.transaction(["tarefas"], "readonly");
+        }
         let store = transaction.objectStore("tarefas");
 
         // Use o índice "indice_tarefa" para buscar pelo nome da tarefa
