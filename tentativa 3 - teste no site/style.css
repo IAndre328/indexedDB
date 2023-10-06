@@ -111,7 +111,7 @@ button:hover{
     z-index: 9999;
 }
 
-.configAlarme{
+.blurPopUp{
     position: absolute;
     top: 40%;
     left: 50%;

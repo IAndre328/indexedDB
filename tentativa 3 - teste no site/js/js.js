@@ -3,7 +3,7 @@ const btn_adicionar = document.querySelector("button#adicionar");
 const btn_limpar = document.querySelector("#limpar");
 const txt = document.querySelector("input#txt");
 const res = document.querySelector("#res");
-
+const dataAtual = new Date();
 
 // Array para armazenar os alarmes
 let alarmes = [];
@@ -16,7 +16,6 @@ const extrairValorInput = (input) => input.value;
 
 // Função para extrair o elemento p pai de um item
 const extrairPDoItem = (item) => item.parentElement.querySelector("p");
-
 
 
 
@@ -149,11 +148,11 @@ function sublinhar(e) {
 function deletar(e) {
     const item = e.target;
     const itemP = item.parentElement;
+
     let id = Number(itemP.querySelector("data").value);
     DB_removerTarefa(id);
-    itemP.remove();
 
-    // banco de dados aqui
+    itemP.remove();
 
 }
 
@@ -162,8 +161,8 @@ function deletar(e) {
 function configAlarme(e) {
   
     const item = e.target;
-  
-    const textoItem = extrairPDoItem(item).textContent;
+   
+    const idItem = Number(item.parentElement.querySelector("data").value);
   
   
       const txtDate = criarElemento("input", ["txtDate"]);
@@ -173,32 +172,47 @@ function configAlarme(e) {
       usoDate.htmlFor = "btn_date";
       usoDate.textContent = "Clique no símbolo da agenda para definir a data!";
   
-      const btn_date = criarElemento("button", ["btn_date"]);
+      const btn_date = criarElemento("button", ["btn_date"],()=>{
+      
+        const txtDate = document.querySelector(".txtDate");
+          let datatxt = new Date(txtDate.value);
+
+          if (!txtDate.value == "" || datatxt - dataAtual > 0 ){
+            DB_buscarTarefaPorId(idItem);
+          } else return;
+
+        
+      });
       btn_date.textContent = "Configurar";
   
-       usePopup([usoDate, txtDate, btn_date], textoItem);
+       usePopup([usoDate, txtDate, btn_date], idItem);
       
     
   }
+
+// Função para inserir alarme
 
 
   // Função para limpar o conteúdo e redefinir o armazenamento local
 function limpar() {
     res.innerHTML = "";
+
     DB_apagarBancoDeDados();
+
     window.location.reload();
-    
 
   }
 
 
 
-  function usePopup(item = [],nomeTarefa) {
-    const divConfigAlarme = criarElemento("div", ["configAlarme"]);
-    const popup = criarElemento("div", ["blur"]);
+  function usePopup(item = [],id = "") {
+    const divPopUp = criarElemento("div", ["popup"]);
+    const blurPopUp = criarElemento("div", ["blur"]);
+
+    if (id != "")blurPopUp.setAttribute("value",id)
   
     const sair = () => {
-      desusePopup(popup);
+      desusePopup(blurPopUp);
     };
   
     const esc = (e) => {
@@ -213,22 +227,11 @@ function limpar() {
       sair();
     });
   
-    adicionarElementos(document.querySelector("body"), [popup]);
-    adicionarElementos(popup, [divConfigAlarme]);
-    adicionarElementos(divConfigAlarme, [btn_fechar]);
-    adicionarElementos(divConfigAlarme, [...item]);
+    adicionarElementos(document.querySelector("body"), [blurPopUp]);
+    adicionarElementos(blurPopUp, [divPopUp]);
+    adicionarElementos(divPopUp, [btn_fechar]);
+    adicionarElementos(divPopUp, [...item]);
   
-    
-    
-      const btn_date = item.find((element) => element.classList.contains("btn_date"));
-      
-      if (btn_date) {
-        btn_date.addEventListener("click", () => {
-          const txtDate = document.querySelector(".txtDate");
-          console.log(txtDate)
-          extrairDadosAlarme(txtDate.value, nomeTarefa, sair);
-        });
-      }
     
     }
   

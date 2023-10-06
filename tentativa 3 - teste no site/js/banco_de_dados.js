@@ -1,50 +1,66 @@
+let indexedDB = window.indexedDB || window.webkitIndexedDB || window.mozIndexedDB || window.msIndexedDB;
+let IDBTransaction = window.IDBTransaction || window.webkitIDBTransaction;
 
+let versaoBanco = 1
 // Abrir ou criar o banco de dados "TarefasData"
-let request = indexedDB.open("TarefasData", 1);
+if ("indexedDB" in window){
+    let request = indexedDB.open("TarefasData", `${versaoBanco}`);
 
-// Manipulador de evento de atualização chamado quando o banco de dados precisa ser criado ou atualizado
-request.onupgradeneeded = function(event) {
-    let db = event.target.result;
+    // Manipulador de evento de atualização chamado quando o banco de dados precisa ser criado ou atualizado
+    request.onupgradeneeded = function(event) {
+        let db = event.target.result;
 
-    // Cria uma tabela chamada "tarefas" com um índice automático
-    let tarefasStore = db.createObjectStore("tarefas", { keyPath: "id", autoIncrement: true });
 
-    // Define os campos que você deseja armazenar na tabela
-    tarefasStore.createIndex("tarefa", "tarefa", { unique: true });
-    tarefasStore.createIndex("sublinhado", "sublinhado", { unique: false });
-    tarefasStore.createIndex("alarme","alarme",{unique:false})
+        if (!db.objectStoreNames.contains('tarefas')) {
+            // Cria uma tabela chamada "tarefas" com um índice automático
+            let tarefasStore = db.createObjectStore("tarefas", { keyPath: "id", autoIncrement: true });
 
-    console.log("Banco de dados 'TarefasData' criado com sucesso.");
-    // interface amigável para autorizar o indexeddb
-    exibirAlerta("Obrigado por autorizar o indexeddb, iremos usar =)")
+            // Define os campos que você deseja armazenar na tabela
+            tarefasStore.createIndex("tarefa", "tarefa", { unique: true });
+            tarefasStore.createIndex("sublinhado", "sublinhado", { unique: false });
+            tarefasStore.createIndex("alarme","alarme",{unique:false})
+        }
 
-};
+
+        console.log("Banco de dados 'TarefasData' criado com sucesso.");
+        // interface amigável para autorizar o indexeddb
+        exibirAlerta("Obrigado por autorizar o indexeddb, iremos usar =)")
+
+    };
 
 // Manipulador de evento de sucesso chamado quando a conexão com o banco de dados é estabelecida
-request.onsuccess = function(event) {
-    let db = event.target.result;
+    request.onsuccess = function(event) {
+        let db = event.target.result;
+
+        
 
     // Agora você pode começar a usar o banco de dados para inserir, recuperar, atualizar ou excluir dados.
-};
+    };
 
 // Manipulador de evento de erro chamado em caso de falha na abertura ou criação do banco de dados
-request.onerror = function(event) {
-    console.error("Erro ao abrir/criar o banco de dados 'TarefasData': " + event.target.error);
-    exibirAlerta("Erro ao abrir/criar o banco de dados 'TarefasData': " + event.target.error);
-};
+    request.onerror = function(event) {
+        console.error("Erro ao abrir/criar o banco de dados 'TarefasData': " + event.target.error);
+        exibirAlerta("Erro ao abrir/criar o banco de dados 'TarefasData': " + event.target.error);
+    };
+    } else{
+        exibirAlerta("IndexedDb não está disponível =( precisaríamos dele");
+    }
+
+
+
 
 
 
 
 function DB_adicionarTarefa(tarefa, sublinhado = false, alarme = "") {
-    let request = indexedDB.open("TarefasData", 1);
+    let request = indexedDB.open("TarefasData", `${versaoBanco}`);
 
     request.onsuccess = function (event) {
         let db = event.target.result;
 
         let transaction;
-        if (window.webkitIDBTransaction && window.webkitIDBTransaction.READ_WRITE) {
-            transaction = db.transaction(["tarefas"], window.webkitIDBTransaction.READ_WRITE);
+        if (window.webkitIDBTransaction && IDBTransaction.READ_WRITE) {
+            transaction = db.transaction(["tarefas"], IDBTransaction.READ_WRITE);
         } else {
             transaction = db.transaction(["tarefas"], "readwrite");
         }
@@ -81,14 +97,14 @@ function DB_atualizarTarefa(id, novaTarefa, novoSublinhado, novoAlarme) {
         return;
     }
 
-    let request = indexedDB.open("TarefasData", 1);
+    let request = indexedDB.open("TarefasData", `${versaoBanco}`);
 
     request.onsuccess = function(event) {
         let db = event.target.result;
         
         let transaction;
-        if (window.webkitIDBTransaction && window.webkitIDBTransaction.READ_WRITE) {
-            transaction = db.transaction(["tarefas"], window.webkitIDBTransaction.READ_WRITE);
+        if (window.webkitIDBTransaction && IDBTransaction.READ_WRITE) {
+            transaction = db.transaction(["tarefas"], IDBTransaction.READ_WRITE);
         } else {
             transaction = db.transaction(["tarefas"], "readwrite");
         }
@@ -130,14 +146,14 @@ function DB_atualizarTarefa(id, novaTarefa, novoSublinhado, novoAlarme) {
 
 
 function DB_removerTarefa(id) {
-    let request = indexedDB.open("TarefasData", 1);
+    let request = indexedDB.open("TarefasData", `${versaoBanco}`);
 
     request.onsuccess = function(event) {
         let db = event.target.result;
         
         let transaction;
-        if (window.webkitIDBTransaction && window.webkitIDBTransaction.READ_WRITE) {
-            transaction = db.transaction(["tarefas"], window.webkitIDBTransaction.READ_WRITE);
+        if (window.webkitIDBTransaction && IDBTransaction.READ_WRITE) {
+            transaction = db.transaction(["tarefas"], IDBTransaction.READ_WRITE);
         } else {
             transaction = db.transaction(["tarefas"], "readwrite");
         }
@@ -158,15 +174,15 @@ function DB_removerTarefa(id) {
 
 
 function DB_visualizarTodasTarefas() {
-    let request = indexedDB.open("TarefasData", 1);
+    let request = indexedDB.open("TarefasData", `${versaoBanco}`);
 
     request.onsuccess = function(event) {
         let db = event.target.result;
 
         // Inicie uma transação de leitura na tabela "tarefas"
         let transaction;
-        if (window.webkitIDBTransaction && window.webkitIDBTransaction.READ_ONLY) {
-            transaction = db.transaction(["tarefas"], window.webkitIDBTransaction.READ_ONLY);
+        if (window.webkitIDBTransaction && IDBTransaction.READ_ONLY) {
+            transaction = db.transaction(["tarefas"], IDBTransaction.READ_ONLY);
         } else {
             transaction = db.transaction(["tarefas"], "readonly");
         }
@@ -209,7 +225,7 @@ function DB_visualizarTodasTarefas() {
 
 
 function DB_buscarTarefaPorNome(nomeTarefa) {
-    let request = indexedDB.open("TarefasData", 1);
+    let request = indexedDB.open("TarefasData", `${versaoBanco}`);
     
     
     request.onsuccess = function(event) {
@@ -217,8 +233,8 @@ function DB_buscarTarefaPorNome(nomeTarefa) {
 
         // Inicie uma transação de leitura na tabela "tarefas"
         let transaction;
-        if (window.webkitIDBTransaction && window.webkitIDBTransaction.READ_ONLY) {
-            transaction = db.transaction(["tarefas"], window.webkitIDBTransaction.READ_ONLY);
+        if (window.webkitIDBTransaction && IDBTransaction.READ_ONLY) {
+            transaction = db.transaction(["tarefas"], IDBTransaction.READ_ONLY);
         } else {
             transaction = db.transaction(["tarefas"], "readonly");
         }
@@ -265,6 +281,44 @@ function DB_buscarTarefaPorNome(nomeTarefa) {
     };
      
 }
+
+function DB_buscarTarefaPorId(id){
+    // Abra a conexão com o IndexedDB e abra o object store
+const request = indexedDB.open('TarefasData', `${versaoBanco}`);
+
+request.onerror = function(event) {
+    console.error("Erro ao abrir a base de dados: " + event.target.errorCode);
+};
+
+request.onsuccess = function(event) {
+    const db = event.target.result;
+     
+    let transaction;
+        if (window.webkitIDBTransaction && IDBTransaction.READ_ONLY) {
+            transaction = db.transaction(["tarefas"], IDBTransaction.READ_ONLY);
+        } else {
+            transaction = db.transaction(["tarefas"], "readonly");
+        }
+        let store = transaction.objectStore("tarefas");
+
+    const getRequest = store.get(id);
+
+    getRequest.onsuccess = function(event) {
+        const resultado = event.target.result;
+        if (resultado) {
+            console.log("Dado encontrado:", resultado);
+        } else {
+            console.log("Dado com ID " + id + " não encontrado.");
+        }
+    };
+
+    getRequest.onerror = function(event) {
+        console.error("Erro ao buscar o dado: " + event.target.error);
+    };
+};
+
+}
+
 
 function DB_apagarBancoDeDados(){
     const nomeDoBancoDeDados = "TarefasData";
