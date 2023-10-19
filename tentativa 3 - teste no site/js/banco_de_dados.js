@@ -52,7 +52,7 @@ if ("indexedDB" in window){
 
 
 
-function DB_adicionarTarefa(tarefa, sublinhado = false, alarme = "") {
+function DB_adicionarTarefa(tarefa, sublinhado = false, alarme = null) {
     let request = indexedDB.open("TarefasData", `${versaoBanco}`);
 
     request.onsuccess = function (event) {
@@ -70,9 +70,9 @@ function DB_adicionarTarefa(tarefa, sublinhado = false, alarme = "") {
         let novaTarefa = {
             tarefa: tarefa,
             sublinhado: sublinhado,
-            alarme: alarme
+            alarme: alarme,
         };
-
+        console.log(novaTarefa.alarme)
         let addRequest = store.add(novaTarefa);
 
         addRequest.onsuccess = function (event) {
@@ -92,9 +92,11 @@ function DB_adicionarTarefa(tarefa, sublinhado = false, alarme = "") {
 // função para atualizar algum dado 
 function DB_atualizarTarefa(id, novaTarefa, novoSublinhado, novoAlarme) {
 
-    if (novaTarefa.trim() == ""){
+    if (novaTarefa){
+        if (novaTarefa.trim() == ""){
         exibirAlerta("Não deixe um campo de tarefa vazio!!");
         return;
+        }
     }
 
     let request = indexedDB.open("TarefasData", `${versaoBanco}`);
@@ -115,13 +117,14 @@ function DB_atualizarTarefa(id, novaTarefa, novoSublinhado, novoAlarme) {
         getRequest.onsuccess = function(event) {
             let tarefa = event.target.result;
             if (tarefa) {
-                tarefa.tarefa = novaTarefa;
-                tarefa.sublinhado = novoSublinhado;
 
-                if(novoAlarme){
-
+                if (novaTarefa)tarefa.tarefa = novaTarefa;
+                if (novoSublinhado)tarefa.sublinhado = novoSublinhado;
+                if (novoAlarme){
+                    tarefa.alarme = novoAlarme;
+                    alarmes.push(tarefa.alarme);
                 }
-
+                    
                 let updateRequest = store.put(tarefa);
 
                 updateRequest.onsuccess = function(event) {
@@ -173,7 +176,7 @@ function DB_removerTarefa(id) {
 
 
 
-function DB_visualizarTodasTarefas() {
+function DB_visualizarTodasTarefas(logonly = false) {
     let request = indexedDB.open("TarefasData", `${versaoBanco}`);
 
     request.onsuccess = function(event) {
@@ -200,11 +203,29 @@ function DB_visualizarTodasTarefas() {
                 let objetoTarefa = {
                     id: cursor.key,
                     tarefa:tarefa.tarefa,
-                    sublinhado:tarefa.sublinhado
+                    sublinhado:tarefa.sublinhado,
+                    alarme:tarefa.alarme,
                 }
 
-                adicionarTarefa(objetoTarefa.id, objetoTarefa.tarefa, objetoTarefa.sublinhado);
-                arrayTarefas.push(objetoTarefa.tarefa);
+                if (logonly == true){
+
+                    console.table(objetoTarefa)
+
+                } else {
+
+                    adicionarTarefa(objetoTarefa.id, objetoTarefa.tarefa, objetoTarefa.sublinhado);
+                    arrayTarefas.push(objetoTarefa.tarefa);
+
+                    if(objetoTarefa.alarme){
+
+                        alarmes.push({
+                            corpo:objetoTarefa.tarefa,
+                            alarme:objetoTarefa.alarme,
+                        });
+                        
+                    }
+
+                }
 
                 cursor.continue(); // Continue para o próximo registro
             } else {
@@ -307,6 +328,7 @@ request.onsuccess = function(event) {
         const resultado = event.target.result;
         if (resultado) {
             console.log("Dado encontrado:", resultado);
+            
         } else {
             console.log("Dado com ID " + id + " não encontrado.");
         }
