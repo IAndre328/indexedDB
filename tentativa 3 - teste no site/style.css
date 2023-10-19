@@ -111,7 +111,7 @@ button:hover{
     z-index: 9999;
 }
 
-.blurPopUp{
+.popup{
     position: absolute;
     top: 40%;
     left: 50%;
@@ -178,9 +178,6 @@ footer{
 
 @media (max-width: 250px){
 
-    section{
-      width: 100vw;
-    }
     label{
       font-size: 0.75rem;
     }
