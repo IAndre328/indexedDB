@@ -17,7 +17,10 @@ const extrairValorInput = (input) => input.value;
 // Função para extrair o elemento p pai de um item
 const extrairPDoItem = (item) => item.parentElement.querySelector("p");
 
-
+// Função para desfazer o popup, leia o usePopup
+const sair = () => {
+  desusePopup(document.querySelector(".blur"));
+};
 
 // Função para verificar e adicionar uma nova tarefa
 function verificarTarefa() {
@@ -136,7 +139,7 @@ function sublinhar(e) {
 
       DB_atualizarTarefa(
         Number(item.parentElement.querySelector("data").value),
-        itemP.textContent,
+        null,
         itemP.classList.contains("sublinhado")
         )
     
@@ -169,20 +172,21 @@ function configAlarme(e) {
       txtDate.type = "datetime-local";
   
       const usoDate = criarElemento("label");
-      usoDate.htmlFor = "btn_date";
+      
       usoDate.textContent = "Clique no símbolo da agenda para definir a data!";
   
       const btn_date = criarElemento("button", ["btn_date"],()=>{
+
+      const txtDate = document.querySelector(".txtDate");
+      let datatxt = new Date(txtDate.value);
       
-        const txtDate = document.querySelector(".txtDate");
-          let datatxt = new Date(txtDate.value);
 
           if (!txtDate.value == "" || datatxt - dataAtual > 0 ){
-            DB_buscarTarefaPorId(idItem);
+            DB_atualizarTarefa(idItem,null,null,txtDate.value);
           } else return;
-
         
       });
+
       btn_date.textContent = "Configurar";
   
        usePopup([usoDate, txtDate, btn_date], idItem);
@@ -190,10 +194,52 @@ function configAlarme(e) {
     
   }
 
-// Função para inserir alarme
+// função para ver se tem alarmes existentes
+function verificarAlarme(){
+  let loop = setInterval(()=>{
+    
+    if (alarmes.length != 0){
+      dispararAlarme();
+      clearInterval(loop);
+    } 
+    
+  },2000);
 
+}
 
-  // Função para limpar o conteúdo e redefinir o armazenamento local
+// função para disparar o alarme
+function dispararAlarme(){
+  if ("Notification" in window) {
+    
+    if (Notification.permission !== "granted" && Notification.permission !== "denied") {
+        // Se a permissão ainda não foi solicitada, exibir um botão para solicitá-la
+
+            Notification.requestPermission().then(function(permission) {
+                if (permission === "granted") {
+                    mostrarNotificacao();
+                }
+            });
+        
+    } else if (Notification.permission === "granted") {
+        // Se a permissão já foi concedida, podemos exibir notificações
+        mostrarNotificacao();
+      }
+    }
+  }
+
+// função para exibir notificação
+  function mostrarNotificacao() {
+    const notification = new Notification("Título da Notificação", {
+        body: "Isso é uma notificação de exemplo",
+        icon: "caminho-para-icone.png"
+    });
+
+    notification.onclick = function() {
+        alert("Você clicou na notificação!");
+    };
+}
+
+// Função para limpar o conteúdo e redefinir o armazenamento local
 function limpar() {
     res.innerHTML = "";
 
@@ -211,13 +257,11 @@ function limpar() {
 
     if (id != "")blurPopUp.setAttribute("value",id)
   
-    const sair = () => {
-      desusePopup(blurPopUp);
-    };
   
     const esc = (e) => {
       if (e.key === "Escape") {
         sair();
+        window.removeEventListener("keydown",esc)
       }
     };
   
@@ -262,4 +306,7 @@ const aoPressionarEnter = evento => {
   btn_adicionar.addEventListener("click", verificarTarefa);
 
 // Adicionar listener para carregar as tarefas salvas
-document.addEventListener("DOMContentLoaded",DB_visualizarTodasTarefas)
+document.addEventListener("DOMContentLoaded",()=>{
+  DB_visualizarTodasTarefas();
+  verificarAlarme();
+})
