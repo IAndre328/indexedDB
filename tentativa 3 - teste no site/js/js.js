@@ -3,8 +3,13 @@ const btn_adicionar = document.querySelector("button#adicionar");
 const btn_limpar = document.querySelector("#limpar");
 const txt = document.querySelector("input#txt");
 const res = document.querySelector("#res");
-const dataAtual = new Date();
 
+let permissaoNotificacao = false;
+
+let dataAtual = new Date();
+setInterval(()=>{
+  dataAtual = new Date()
+},2000)
 // Array para armazenar os alarmes
 let alarmes = [];
 
@@ -21,6 +26,22 @@ const extrairPDoItem = (item) => item.parentElement.querySelector("p");
 const sair = () => {
   desusePopup(document.querySelector(".blur"));
 };
+
+// Função para remover um ítem de um array
+const removeItemArray = (array,item) => {
+ return array.filter(valor => {
+  if (valor.corpo) {
+
+    valor.corpo != item;
+
+  } else {
+
+    valor != item;
+
+  }
+ })
+}
+
 
 // Função para verificar e adicionar uma nova tarefa
 function verificarTarefa() {
@@ -150,21 +171,24 @@ function sublinhar(e) {
 // Função para deletar uma tarefa
 function deletar(e) {
     const item = e.target;
-    const itemP = item.parentElement;
-
-    let id = Number(itemP.querySelector("data").value);
+    const itemP = extrairPDoItem(item).textContent;
+    console.log()
+    let id = Number(item.parentElement.querySelector("data").value);
     DB_removerTarefa(id);
 
-    itemP.remove();
+    arrayTarefas = removeItemArray(arrayTarefas,itemP);
+    alarmes = removeItemArray(alarmes,itemP);
+
+    item.parentElement.remove();
 
 }
 
 
 // Função para lidar com a configuração do alarme
 function configAlarme(e) {
-  
     const item = e.target;
-   
+    const itemP = extrairPDoItem(item).textContent;
+    
     const idItem = Number(item.parentElement.querySelector("data").value);
   
   
@@ -179,10 +203,11 @@ function configAlarme(e) {
 
       const txtDate = document.querySelector(".txtDate");
       let datatxt = new Date(txtDate.value);
-      
-
-          if (!txtDate.value == "" || datatxt - dataAtual > 0 ){
-            DB_atualizarTarefa(idItem,null,null,txtDate.value);
+      let diferenca = datatxt - dataAtual;
+      console.log(diferenca)
+          if (!txtDate.value == "" && diferenca > 0 ){
+            DB_atualizarTarefa(idItem,itemP,null,datatxt);
+            sair();
           } else return;
         
       });
@@ -196,19 +221,44 @@ function configAlarme(e) {
 
 // função para ver se tem alarmes existentes
 function verificarAlarme(){
+  pegarPermissao();
   let loop = setInterval(()=>{
     
     if (alarmes.length != 0){
-      dispararAlarme();
       clearInterval(loop);
+    
+      setInterval(()=>{
+
+        alarmes.forEach(alarme =>{
+          let diferenca = alarme.alarme - dataAtual;
+          let tolerancia = 2000;
+          console.log(diferenca)
+
+          if (permissaoNotificacao){
+
+            if (diferenca <= tolerancia) {
+              mostrarNotificacao(alarme.corpo);
+              alarmes = removeItemArray(alarmes,alarme.corpo);
+  
+            } 
+          } else {
+            if (diferenca <0) {
+              exibirAlerta(`Alarme para a tarefa: ${alarme.corpo} às ${alarme.alarme}`)
+            }
+          }
+         
+        });
+
+      },2000)
+
     } 
     
   },2000);
 
 }
 
-// função para disparar o alarme
-function dispararAlarme(){
+// Função para pegar permissão para notificação
+function pegarPermissao() {
   if ("Notification" in window) {
     
     if (Notification.permission !== "granted" && Notification.permission !== "denied") {
@@ -216,27 +266,32 @@ function dispararAlarme(){
 
             Notification.requestPermission().then(function(permission) {
                 if (permission === "granted") {
-                    mostrarNotificacao();
+                  permissaoNotificacao = true;
                 }
             });
         
     } else if (Notification.permission === "granted") {
         // Se a permissão já foi concedida, podemos exibir notificações
-        mostrarNotificacao();
+        permissaoNotificacao = true;
       }
     }
-  }
+}
+
 
 // função para exibir notificação
-  function mostrarNotificacao() {
-    const notification = new Notification("Título da Notificação", {
-        body: "Isso é uma notificação de exemplo",
-        icon: "caminho-para-icone.png"
+  function mostrarNotificacao(mensagem = "") {
+    
+    if (permissaoNotificacao == true) {
+      const notification = new Notification("Título da Notificação", {
+        body: mensagem,
+        icon: "./imagem/lixeira.png"
     });
 
     notification.onclick = function() {
         alert("Você clicou na notificação!");
     };
+    }
+    
 }
 
 // Função para limpar o conteúdo e redefinir o armazenamento local
