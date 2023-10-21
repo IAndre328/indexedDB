@@ -1,7 +1,7 @@
 let indexedDB = window.indexedDB || window.webkitIndexedDB || window.mozIndexedDB || window.msIndexedDB;
 let IDBTransaction = window.IDBTransaction || window.webkitIDBTransaction;
 
-let versaoBanco = 1
+let versaoBanco = 1;
 // Abrir ou criar o banco de dados "TarefasData"
 if ("indexedDB" in window){
     let request = indexedDB.open("TarefasData", `${versaoBanco}`);
@@ -122,7 +122,10 @@ function DB_atualizarTarefa(id, novaTarefa, novoSublinhado, novoAlarme) {
                 if (novoSublinhado)tarefa.sublinhado = novoSublinhado;
                 if (novoAlarme){
                     tarefa.alarme = novoAlarme;
-                    alarmes.push(tarefa.alarme);
+                    alarmes.push({
+                        corpo:novaTarefa,
+                        alarme:novoAlarme,
+                    });
                 }
                     
                 let updateRequest = store.put(tarefa);
